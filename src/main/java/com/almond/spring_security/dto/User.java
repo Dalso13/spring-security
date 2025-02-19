@@ -9,13 +9,24 @@ import java.sql.Timestamp;
 
 @AllArgsConstructor
 @Getter
-@ToString
 @Setter
+@ToString
 public class User {
-    private Long id;
+    private Integer id;
     private String username;
     private String password;
     private String role;
     private String email;
+    private String provider, providerId;
     private Timestamp createDate;
+
+
+    public User(String username, String password, String role, String email, String provider, String providerId) {
+        this.username = username;
+        this.password = password;
+        this.role = role;
+        this.email = email;
+        this.provider = provider;
+        this.providerId = providerId;
+    }
 }

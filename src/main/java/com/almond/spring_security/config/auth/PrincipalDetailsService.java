@@ -3,6 +3,7 @@ package com.almond.spring_security.config.auth;
 
 import com.almond.spring_security.dto.User;
 import com.almond.spring_security.mapper.UserMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 // login 요청이 오면 자동으로 UserDetailsService 타입으로 IoC되어 있는 loadUserByUsername() 함수가 실
 
 @Service
+@Slf4j
 public class PrincipalDetailsService implements UserDetailsService {
 
     @Autowired
@@ -23,6 +25,7 @@ public class PrincipalDetailsService implements UserDetailsService {
     @Override                             // 프론트 form input name이 username과 이름이 같아야한다.
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = mapper.findByUsername(username);
+        log.info("user : {}", user);
         if (user != null) {
             return new PrincipalDetails(user);
         }
