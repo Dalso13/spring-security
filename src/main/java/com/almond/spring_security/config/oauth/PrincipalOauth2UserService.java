@@ -1,6 +1,9 @@
 package com.almond.spring_security.config.oauth;
 
 import com.almond.spring_security.config.auth.PrincipalDetails;
+import com.almond.spring_security.config.auth.provider.GoogleUserInfo;
+import com.almond.spring_security.config.auth.provider.NaverUserInfo;
+import com.almond.spring_security.config.auth.provider.OAuth2UserInfo;
 import com.almond.spring_security.dto.User;
 import com.almond.spring_security.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -40,13 +43,26 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
         log.info("getAttributes: {}", oAuth2User.getAttributes());
 
         // DB에 저장
-        String provider = userRequest.getClientRegistration().getClientId(); // google
-        String providerId = oAuth2User.getAttribute("sub");
-        String email = oAuth2User.getAttribute("email");
+        String provider = userRequest.getClientRegistration().getRegistrationId(); // google
+
+        // TODO: google은 sub, naver는 id, kakao는 id로 가져온다
+        OAuth2UserInfo oAuth2UserInfo = null;
+        switch (provider) {
+            case "google":
+                oAuth2UserInfo = new GoogleUserInfo(oAuth2User.getAttributes());
+                break;
+            default: oAuth2UserInfo = new NaverUserInfo(oAuth2User.getAttributes());
+                break;
+        }
+
+
+        String providerId = oAuth2UserInfo.getProviderId();
+        String email = oAuth2UserInfo.getEmail();
         String username = provider + "_" + providerId; // google_123123123123
         String role = "ROLE_USER";
         // 패스워드는 무작위 값 암호화 필자는 그냥 엑세스토큰 암호화해서 넣기
         String password = passwordEncoder.encode(userRequest.getAccessToken().getTokenValue());
+
 
         User user = mapper.findByUsername(username);
         if (user == null) {
