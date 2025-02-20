@@ -17,8 +17,8 @@ public class User {
     private String password;
     private String role;
     private String email;
-    private String provider, providerId;
     private Timestamp createDate;
+    private String provider, providerId;
 
 
     public User(String username, String password, String role, String email, String provider, String providerId) {

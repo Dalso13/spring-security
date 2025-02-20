@@ -15,6 +15,8 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 // PrincipalDetailService 와 같은 역할, 다만 Oauth2 기능에서만 작동
 // 0auth2 로그인 시 유저 정보가 DB에 없을시 강제로 DB에 저장
 @Service
@@ -34,9 +36,9 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
         // 그중 username, email을 사용해서 회원가입을 시킨다.
         // username은 id가 암호화된 형태로 보내지는데 google_{id} 형태로 저장
         // password는 없으므로 임의의 값을 넣어준다.
-        log.info("userRequest: {}", userRequest.toString());
-        log.info("getClientRegistration: {}", userRequest.getClientRegistration());
-        log.info("getAccessToken: {}", userRequest.getAccessToken().getTokenValue());
+//        log.info("userRequest: {}", userRequest.toString());
+//        log.info("getClientRegistration: {}", userRequest.getClientRegistration());
+//        log.info("getAccessToken: {}", userRequest.getAccessToken().getTokenValue());
 
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
@@ -44,17 +46,18 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
 
         // DB에 저장
         String provider = userRequest.getClientRegistration().getRegistrationId(); // google
-
+        log.info("provider: {}", provider);
         // TODO: google은 sub, naver는 id, kakao는 id로 가져온다
         OAuth2UserInfo oAuth2UserInfo = null;
         switch (provider) {
             case "google":
                 oAuth2UserInfo = new GoogleUserInfo(oAuth2User.getAttributes());
                 break;
-            default: oAuth2UserInfo = new NaverUserInfo(oAuth2User.getAttributes());
+            case "naver":
+                oAuth2UserInfo = new NaverUserInfo((Map<String, Object>)oAuth2User.getAttributes().get("response"));
                 break;
-        }
-
+            default: return super.loadUser(userRequest);
+        };
 
         String providerId = oAuth2UserInfo.getProviderId();
         String email = oAuth2UserInfo.getEmail();
